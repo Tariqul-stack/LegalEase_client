@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import axiosInstance from '@/lib/axios';
 import { useAuth } from '@/hooks/useAuth';
+import { signInWithGoogle } from '@/lib/auth-client';
 
 // Role Selection Modal Component
 function RoleSelectionModal({ onSelectRole }) {
@@ -111,6 +112,29 @@ export default function RegisterPage() {
         err.response?.data?.message ||
           'Registration failed. This email may already be in use.'
       );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const profile = await signInWithGoogle();
+      
+      const response = await axiosInstance.post('/api/auth/google-login', {
+        name: profile.name,
+        email: profile.email,
+        photo: profile.photo,
+      });
+      
+      const { token, user } = response.data;
+      // We will assume they are users by default, or we can show the role selection modal
+      setRegisteredData({ token, user });
+      setShowRoleModal(true);
+    } catch (err) {
+      setError(err.message || 'Google registration failed.');
     } finally {
       setLoading(false);
     }
@@ -291,7 +315,9 @@ export default function RegisterPage() {
               <div className="mt-6">
                 <button
                   type="button"
-                  className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1A3C5E] transition-colors"
+                  onClick={handleGoogleLogin}
+                  disabled={loading}
+                  className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1A3C5E] disabled:opacity-70 transition-colors"
                 >
                   <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24" width="24px" height="24px">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
