@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import axiosInstance from '@/lib/axios';
 
 function RoleBadge({ role }) {
@@ -103,19 +103,10 @@ function DeleteButton({ userId, onDelete }) {
   );
 }
 
-export default function ManageUsersPage() {
-  const router = useRouter();
+function ManageUsersContent() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
-  // Admin guard
-  useEffect(() => {
-    try {
-      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-      if (storedUser.role !== 'admin') router.replace('/');
-    } catch { router.replace('/'); }
-  }, [router]);
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -129,7 +120,13 @@ export default function ManageUsersPage() {
     }
   }, []);
 
-  useEffect(() => { fetchUsers(); }, [fetchUsers]);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchUsers();
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, [fetchUsers]);
 
   const handleRoleChange = (id, newRole) => {
     setUsers((prev) => prev.map((u) => (u._id === id ? { ...u, role: newRole } : u)));
@@ -210,5 +207,13 @@ export default function ManageUsersPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ManageUsersPage() {
+  return (
+    <ProtectedRoute allowedRoles={['admin']}>
+      <ManageUsersContent />
+    </ProtectedRoute>
   );
 }

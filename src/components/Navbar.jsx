@@ -19,7 +19,8 @@ export default function Navbar() {
 
   // Prevent hydration mismatch by only rendering user-dependent UI after mount
   useEffect(() => {
-    setMounted(true);
+    const timer = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const navLinks = [
@@ -27,8 +28,14 @@ export default function Navbar() {
     { name: 'Browse Lawyers', path: '/browse' },
   ];
 
+  const getDashboardPath = (role) => {
+    if (role === 'admin') return '/dashboard/admin/manage-users';
+    if (role === 'lawyer') return '/dashboard/lawyer/hiring-history';
+    return '/dashboard/user/hiring-history';
+  };
+
   if (mounted && user && token) {
-    navLinks.push({ name: 'Dashboard', path: '/dashboard' });
+    navLinks.push({ name: 'Dashboard', path: getDashboardPath(user.role) });
   }
 
   const toggleMobileMenu = () => {
@@ -95,7 +102,7 @@ export default function Navbar() {
                   {isDropdownOpen && (
                     <div className="absolute right-0 mt-3 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-100">
                       <Link
-                        href="/dashboard"
+                        href={getDashboardPath(user.role)}
                         onClick={() => setIsDropdownOpen(false)}
                         className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import axiosInstance from '@/lib/axios';
 
 function EditModal({ comment, onClose, onSave }) {
@@ -56,7 +57,7 @@ function EditModal({ comment, onClose, onSave }) {
   );
 }
 
-export default function UserCommentsPage() {
+function UserCommentsContent() {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -129,7 +130,7 @@ export default function UserCommentsPage() {
       {!loading && !error && comments.length === 0 && (
         <div className="text-center py-20 bg-white rounded-2xl shadow">
           <span className="text-5xl">💬</span>
-          <p className="mt-4 text-gray-500 font-medium">You haven't posted any comments yet.</p>
+          <p className="mt-4 text-gray-500 font-medium">You have not posted any comments yet.</p>
         </div>
       )}
 
@@ -171,5 +172,13 @@ export default function UserCommentsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function UserCommentsPage() {
+  return (
+    <ProtectedRoute allowedRoles={['user']}>
+      <UserCommentsContent />
+    </ProtectedRoute>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import axiosInstance from '@/lib/axios';
 
 function StatusBadge({ status }) {
@@ -20,7 +21,7 @@ function StatusBadge({ status }) {
   );
 }
 
-export default function UserHiringHistoryPage() {
+function UserHiringHistoryContent() {
   const [hirings, setHirings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -71,7 +72,7 @@ export default function UserHiringHistoryPage() {
       {!error && hirings.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-2xl shadow">
           <span className="text-5xl">📋</span>
-          <p className="mt-4 text-gray-500 font-medium">You haven't hired any lawyers yet.</p>
+          <p className="mt-4 text-gray-500 font-medium">You have not hired any lawyers yet.</p>
         </div>
       ) : (
         <div className="bg-white rounded-2xl shadow overflow-x-auto">
@@ -138,5 +139,13 @@ export default function UserHiringHistoryPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function UserHiringHistoryPage() {
+  return (
+    <ProtectedRoute allowedRoles={['user']}>
+      <UserHiringHistoryContent />
+    </ProtectedRoute>
   );
 }

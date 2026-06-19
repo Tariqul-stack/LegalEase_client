@@ -1,21 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import axiosInstance from '@/lib/axios';
 
-export default function AllTransactionsPage() {
-  const router = useRouter();
+function AllTransactionsContent() {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    try {
-      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-      if (storedUser.role !== 'admin') router.replace('/');
-    } catch { router.replace('/'); }
-  }, [router]);
 
   useEffect(() => {
     const fetch = async () => {
@@ -110,5 +102,13 @@ export default function AllTransactionsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function AllTransactionsPage() {
+  return (
+    <ProtectedRoute allowedRoles={['admin']}>
+      <AllTransactionsContent />
+    </ProtectedRoute>
   );
 }

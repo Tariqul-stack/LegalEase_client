@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import axiosInstance from '@/lib/axios';
 
 function getStoredUser() {
@@ -22,7 +23,7 @@ const EMPTY_FORM = {
   status: 'available',
 };
 
-export default function ManageLegalProfilePage() {
+function ManageLegalProfileContent() {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null); // existing lawyer doc or null
   const [loading, setLoading] = useState(true);
@@ -33,49 +34,53 @@ export default function ManageLegalProfilePage() {
 
   // ── On mount: load user + fetch existing lawyer profile ───────────────────
   useEffect(() => {
-    const storedUser = getStoredUser();
-    setUser(storedUser);
+    const timer = setTimeout(() => {
+      const storedUser = getStoredUser();
+      setUser(storedUser);
 
-    const fetchProfile = async () => {
-      try {
-        const res = await axiosInstance.get('/api/lawyers');
-        const all = Array.isArray(res.data) ? res.data : [];
-        // Find the profile that belongs to this user
-        const mine = all.find(
-          (l) => l.userId === storedUser?._id || l.userId === storedUser?.id
-        );
-        if (mine) {
-          setProfile(mine);
-          setFormData({
-            name: mine.name || storedUser?.name || '',
-            bio: mine.bio || '',
-            specialization: mine.specialization || '',
-            consultationFee: mine.consultationFee ?? '',
-            photo: mine.photo || storedUser?.photo || '',
-            status: mine.status || 'available',
-          });
-        } else {
-          // No profile yet — prefill name/email from stored user
+      const fetchProfile = async () => {
+        try {
+          const res = await axiosInstance.get('/api/lawyers');
+          const all = Array.isArray(res.data) ? res.data : [];
+          // Find the profile that belongs to this user
+          const mine = all.find(
+            (l) => l.userId === storedUser?._id || l.userId === storedUser?.id
+          );
+          if (mine) {
+            setProfile(mine);
+            setFormData({
+              name: mine.name || storedUser?.name || '',
+              bio: mine.bio || '',
+              specialization: mine.specialization || '',
+              consultationFee: mine.consultationFee ?? '',
+              photo: mine.photo || storedUser?.photo || '',
+              status: mine.status || 'available',
+            });
+          } else {
+            // No profile yet — prefill name/email from stored user
+            setFormData((prev) => ({
+              ...prev,
+              name: storedUser?.name || '',
+              photo: storedUser?.photo || '',
+            }));
+          }
+        } catch {
+          // If endpoint fails, treat as no profile
           setFormData((prev) => ({
             ...prev,
             name: storedUser?.name || '',
             photo: storedUser?.photo || '',
           }));
+        } finally {
+          setLoading(false);
         }
-      } catch {
-        // If endpoint fails, treat as no profile
-        setFormData((prev) => ({
-          ...prev,
-          name: storedUser?.name || '',
-          photo: storedUser?.photo || '',
-        }));
-      } finally {
-        setLoading(false);
-      }
-    };
+      };
 
-    if (storedUser) fetchProfile();
-    else setLoading(false);
+      if (storedUser) fetchProfile();
+      else setLoading(false);
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const handleChange = (e) => {
@@ -176,9 +181,8 @@ export default function ManageLegalProfilePage() {
                 className="w-24 h-24 rounded-full object-cover border-4 border-[#1A3C5E]/20 shadow"
               />
               <span
-                className={`absolute bottom-0 right-0 w-5 h-5 rounded-full border-2 border-white ${
-                  formData.status === 'available' ? 'bg-green-500' : 'bg-red-400'
-                }`}
+                className={`absolute bottom-0 right-0 w-5 h-5 rounded-full border-2 border-white ${formData.status === 'available' ? 'bg-green-500' : 'bg-red-400'
+                  }`}
               />
             </div>
           </div>
@@ -276,22 +280,20 @@ export default function ManageLegalProfilePage() {
               <button
                 type="button"
                 onClick={() => setFormData((p) => ({ ...p, status: 'available' }))}
-                className={`flex-1 py-2.5 rounded-lg text-sm font-medium border-2 transition-all ${
-                  formData.status === 'available'
+                className={`flex-1 py-2.5 rounded-lg text-sm font-medium border-2 transition-all ${formData.status === 'available'
                     ? 'border-green-500 bg-green-50 text-green-700'
                     : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                }`}
+                  }`}
               >
                 ● Available
               </button>
               <button
                 type="button"
                 onClick={() => setFormData((p) => ({ ...p, status: 'busy' }))}
-                className={`flex-1 py-2.5 rounded-lg text-sm font-medium border-2 transition-all ${
-                  formData.status === 'busy'
+                className={`flex-1 py-2.5 rounded-lg text-sm font-medium border-2 transition-all ${formData.status === 'busy'
                     ? 'border-red-400 bg-red-50 text-red-600'
                     : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                }`}
+                  }`}
               >
                 ● Busy
               </button>
@@ -333,5 +335,13 @@ export default function ManageLegalProfilePage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function ManageLegalProfilePage() {
+  return (
+    <ProtectedRoute allowedRoles={['lawyer']}>
+      <ManageLegalProfileContent />
+    </ProtectedRoute>
   );
 }

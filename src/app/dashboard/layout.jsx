@@ -35,6 +35,8 @@ const navByRole = {
   ],
 };
 
+const adminAccessibleLinks = navByRole.admin;
+
 export default function DashboardLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -43,18 +45,22 @@ export default function DashboardLayout({ children }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    const token = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-    if (!token || !storedUser) {
-      router.replace('/login');
-      return;
-    }
-    try {
-      setUser(JSON.parse(storedUser));
-    } catch {
-      router.replace('/login');
-    }
+    const timer = setTimeout(() => {
+      setMounted(true);
+      const token = localStorage.getItem('token');
+      const storedUser = localStorage.getItem('user');
+      if (!token || !storedUser) {
+        router.replace('/login');
+        return;
+      }
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch {
+        router.replace('/login');
+      }
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, [router]);
 
   if (!mounted || !user) {
@@ -65,7 +71,7 @@ export default function DashboardLayout({ children }) {
     );
   }
 
-  const links = navByRole[user.role] || navByRole.user;
+  const links = user.role === 'admin' ? adminAccessibleLinks : navByRole[user.role] || navByRole.user;
   const roleBadge = {
     user: 'bg-blue-100 text-blue-700',
     lawyer: 'bg-purple-100 text-purple-700',

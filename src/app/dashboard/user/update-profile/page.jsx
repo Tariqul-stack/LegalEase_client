@@ -1,22 +1,28 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import axiosInstance from '@/lib/axios';
 
-export default function UpdateProfilePage() {
+function UpdateProfileContent() {
   const [formData, setFormData] = useState({ name: '', photo: '' });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem('user');
-      if (raw) {
-        const user = JSON.parse(raw);
-        setFormData({ name: user.name || '', photo: user.photo || '' });
+    const timer = setTimeout(() => {
+      try {
+        const raw = localStorage.getItem('user');
+        if (raw) {
+          const user = JSON.parse(raw);
+          setFormData({ name: user.name || '', photo: user.photo || '' });
+        }
+      } catch {
       }
-    } catch {}
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const handleChange = (e) => {
@@ -143,5 +149,13 @@ export default function UpdateProfilePage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function UpdateProfilePage() {
+  return (
+    <ProtectedRoute allowedRoles={['user']}>
+      <UpdateProfileContent />
+    </ProtectedRoute>
   );
 }

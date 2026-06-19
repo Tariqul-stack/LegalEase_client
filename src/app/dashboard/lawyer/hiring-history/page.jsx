@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import axiosInstance from '@/lib/axios';
 
 function StatusBadge({ status }) {
@@ -71,7 +72,7 @@ function ActionButtons({ hiring, onStatusChange }) {
   );
 }
 
-export default function LawyerHiringHistoryPage() {
+function LawyerHiringHistoryContent() {
   const [hirings, setHirings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -89,7 +90,11 @@ export default function LawyerHiringHistoryPage() {
   }, []);
 
   useEffect(() => {
-    fetchHirings();
+    const timer = setTimeout(() => {
+      fetchHirings();
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, [fetchHirings]);
 
   // Optimistic update — no full refetch needed
@@ -206,5 +211,13 @@ export default function LawyerHiringHistoryPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function LawyerHiringHistoryPage() {
+  return (
+    <ProtectedRoute allowedRoles={['lawyer']}>
+      <LawyerHiringHistoryContent />
+    </ProtectedRoute>
   );
 }

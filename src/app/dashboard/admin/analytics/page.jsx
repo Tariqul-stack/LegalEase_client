@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import axiosInstance from '@/lib/axios';
 
 const STAT_CONFIG = [
@@ -58,18 +58,10 @@ function StatCardSkeleton() {
   );
 }
 
-export default function AnalyticsPage() {
-  const router = useRouter();
+function AnalyticsContent() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    try {
-      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-      if (storedUser.role !== 'admin') router.replace('/');
-    } catch { router.replace('/'); }
-  }, [router]);
 
   useEffect(() => {
     const fetch = async () => {
@@ -167,5 +159,13 @@ export default function AnalyticsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function AnalyticsPage() {
+  return (
+    <ProtectedRoute allowedRoles={['admin']}>
+      <AnalyticsContent />
+    </ProtectedRoute>
   );
 }
