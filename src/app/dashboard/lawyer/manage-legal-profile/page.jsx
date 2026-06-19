@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import ImageUpload from '@/components/ImageUpload';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import axiosInstance from '@/lib/axios';
 
@@ -178,7 +179,7 @@ function ManageLegalProfileContent() {
               <img
                 src={previewAvatar}
                 alt="Profile preview"
-                className="w-24 h-24 rounded-full object-cover border-4 border-[#1A3C5E]/20 shadow"
+                className="w-20 h-20 rounded-full object-cover border-4 border-[#1A3C5E]/20 shadow"
               />
               <span
                 className={`absolute bottom-0 right-0 w-5 h-5 rounded-full border-2 border-white ${formData.status === 'available' ? 'bg-green-500' : 'bg-red-400'
@@ -256,20 +257,17 @@ function ManageLegalProfileContent() {
             />
           </div>
 
-          {/* Photo URL */}
+          {/* Photo Upload */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="photo">
-              Profile Photo URL{' '}
-              <span className="text-gray-400 font-normal">(imgBB upload coming soon)</span>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Profile Photo
             </label>
-            <input
-              id="photo"
-              name="photo"
-              type="url"
-              value={formData.photo}
-              onChange={handleChange}
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1A3C5E]/40 focus:border-[#1A3C5E]"
-              placeholder="https://example.com/photo.jpg"
+            <ImageUpload
+              onUpload={(url) => {
+                setFormData((prev) => ({ ...prev, photo: url }));
+                setSuccess('');
+                setError('');
+              }}
             />
           </div>
 
