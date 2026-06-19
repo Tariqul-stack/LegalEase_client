@@ -3,24 +3,35 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { 
+  FaUser, 
+  FaHistory, 
+  FaComments, 
+  FaUserEdit, 
+  FaClipboardList, 
+  FaBriefcase, 
+  FaUsers, 
+  FaMoneyBillWave, 
+  FaChartBar 
+} from 'react-icons/fa';
 
 const navByRole = {
   user: [
-    { label: 'My Profile', path: '/dashboard', icon: '👤' },
-    { label: 'Hiring History', path: '/dashboard/user/hiring-history', icon: '📋' },
-    { label: 'My Comments', path: '/dashboard/user/comments', icon: '💬' },
-    { label: 'Update Profile', path: '/dashboard/user/update-profile', icon: '✏️' },
+    { label: 'My Profile', path: '/dashboard', icon: <FaUser /> },
+    { label: 'Hiring History', path: '/dashboard/user/hiring-history', icon: <FaHistory /> },
+    { label: 'My Comments', path: '/dashboard/user/comments', icon: <FaComments /> },
+    { label: 'Update Profile', path: '/dashboard/user/update-profile', icon: <FaUserEdit /> },
   ],
   lawyer: [
-    { label: 'My Profile', path: '/dashboard', icon: '👤' },
-    { label: 'Hiring Requests', path: '/dashboard/lawyer/hiring-history', icon: '📋' },
-    { label: 'Manage Profile', path: '/dashboard/lawyer/manage-legal-profile', icon: '⚖️' },
+    { label: 'My Profile', path: '/dashboard', icon: <FaUser /> },
+    { label: 'Hiring Requests', path: '/dashboard/lawyer/hiring-history', icon: <FaClipboardList /> },
+    { label: 'Manage Profile', path: '/dashboard/lawyer/manage-legal-profile', icon: <FaBriefcase /> },
   ],
   admin: [
-    { label: 'My Profile', path: '/dashboard', icon: '👤' },
-    { label: 'Manage Users', path: '/dashboard/admin/manage-users', icon: '👥' },
-    { label: 'All Transactions', path: '/dashboard/admin/all-transactions', icon: '💳' },
-    { label: 'Analytics', path: '/dashboard/admin/analytics', icon: '📊' },
+    { label: 'My Profile', path: '/dashboard', icon: <FaUser /> },
+    { label: 'Manage Users', path: '/dashboard/admin/manage-users', icon: <FaUsers /> },
+    { label: 'All Transactions', path: '/dashboard/admin/all-transactions', icon: <FaMoneyBillWave /> },
+    { label: 'Analytics', path: '/dashboard/admin/analytics', icon: <FaChartBar /> },
   ],
 };
 

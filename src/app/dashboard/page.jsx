@@ -10,7 +10,7 @@ export default function DashboardHomePage() {
     try {
       const raw = localStorage.getItem('user');
       if (raw) setUser(JSON.parse(raw));
-    } catch {}
+    } catch { }
   }, []);
 
   if (!user) {
@@ -46,9 +46,8 @@ export default function DashboardHomePage() {
             <h2 className="text-xl font-bold text-gray-900">{user.name}</h2>
             <p className="text-gray-500 text-sm mt-1">{user.email}</p>
             <span
-              className={`inline-block mt-2 text-xs font-semibold px-3 py-1 rounded-full capitalize ${
-                roleBadgeStyles[user.role] || 'bg-gray-100 text-gray-700'
-              }`}
+              className={`inline-block mt-2 text-xs font-semibold px-3 py-1 rounded-full capitalize ${roleBadgeStyles[user.role] || 'bg-gray-100 text-gray-700'
+                }`}
             >
               {user.role}
             </span>
@@ -61,7 +60,7 @@ export default function DashboardHomePage() {
               href="/dashboard/user/update-profile"
               className="px-5 py-2.5 bg-[#1A3C5E] text-white text-sm font-medium rounded-lg hover:bg-[#15304a] transition-colors"
             >
-              ✏️ Update Profile
+              Update Profile
             </Link>
           )}
           <Link

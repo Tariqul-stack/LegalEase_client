@@ -4,11 +4,17 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import toast from 'react-hot-toast';
+import { HiMenu, HiX } from 'react-icons/hi';
+import { FaUserCircle } from 'react-icons/fa';
+import { MdDashboard } from 'react-icons/md';
+import { FiLogOut } from 'react-icons/fi';
 
 export default function Navbar() {
   const { user, token, logout, loading } = useAuth();
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   // Prevent hydration mismatch by only rendering user-dependent UI after mount
@@ -27,6 +33,13 @@ export default function Navbar() {
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const handleLogout = () => {
+    logout();
+    setIsDropdownOpen(false);
+    setIsMobileMenuOpen(false);
+    toast.success('Logged out successfully!');
   };
 
   return (
@@ -58,21 +71,46 @@ export default function Navbar() {
 
             {mounted && !loading && (
               user && token ? (
-                <div className="flex items-center space-x-4 ml-4 border-l border-white/20 pl-4">
-                  <div className="flex items-center space-x-2">
-                    <img
-                      src={user.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`}
-                      alt={user.name}
-                      className="w-8 h-8 rounded-full object-cover border border-white/30 bg-gray-200"
-                    />
-                    <span className="text-sm font-medium">{user.name}</span>
-                  </div>
+                <div className="relative ml-4 border-l border-white/20 pl-4">
                   <button
-                    onClick={logout}
-                    className="bg-red-500/80 hover:bg-red-600 px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className="flex items-center space-x-2 focus:outline-none hover:opacity-80 transition"
                   >
-                    Logout
+                    {user.photo ? (
+                      <img
+                        src={user.photo}
+                        alt={user.name}
+                        className="w-8 h-8 rounded-full object-cover border border-white/30 bg-gray-200"
+                      />
+                    ) : (
+                      <FaUserCircle className="w-8 h-8 text-gray-200" />
+                    )}
+                    <span className="text-sm font-medium">{user.name}</span>
+                    <svg className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
                   </button>
+
+                  {/* Dropdown Menu */}
+                  {isDropdownOpen && (
+                    <div className="absolute right-0 mt-3 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-100">
+                      <Link
+                        href="/dashboard"
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        <MdDashboard className="mr-2" />
+                        Dashboard
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                      >
+                        <FiLogOut className="mr-2" />
+                        Logout
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="ml-4">
@@ -95,13 +133,9 @@ export default function Navbar() {
             >
               <span className="sr-only">Open main menu</span>
               {!isMobileMenuOpen ? (
-                <svg className="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
+                <HiMenu className="block h-6 w-6" />
               ) : (
-                <svg className="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <HiX className="block h-6 w-6" />
               )}
             </button>
           </div>
@@ -131,23 +165,25 @@ export default function Navbar() {
               user && token ? (
                 <div className="pt-4 pb-3 border-t border-white/10 mt-4">
                   <div className="flex items-center px-3 mb-4">
-                    <img
-                      src={user.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`}
-                      alt={user.name}
-                      className="w-10 h-10 rounded-full object-cover border border-white/30 bg-gray-200"
-                    />
+                    {user.photo ? (
+                      <img
+                        src={user.photo}
+                        alt={user.name}
+                        className="w-10 h-10 rounded-full object-cover border border-white/30 bg-gray-200"
+                      />
+                    ) : (
+                      <FaUserCircle className="w-10 h-10 text-gray-200" />
+                    )}
                     <div className="ml-3">
                       <div className="text-base font-medium text-white">{user.name}</div>
                       <div className="text-sm font-medium text-gray-300 capitalize">{user.role}</div>
                     </div>
                   </div>
                   <button
-                    onClick={() => {
-                      logout();
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-300 hover:bg-white/10 hover:text-red-200"
+                    onClick={handleLogout}
+                    className="flex items-center w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-300 hover:bg-white/10 hover:text-red-200"
                   >
+                    <FiLogOut className="mr-2" />
                     Logout
                   </button>
                 </div>
