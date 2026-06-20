@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import ImageUpload from '@/components/ImageUpload';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import axiosInstance from '@/lib/axios';
@@ -169,25 +170,29 @@ function ManageLegalProfileContent() {
 
   return (
     <div>
-      <div className="flex items-center gap-3 mb-2">
-        <h1 className="text-2xl font-extrabold text-gray-800">Manage Legal Profile</h1>
-        {profile ? (
-          <span className="bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full">
-            Profile Active
-          </span>
-        ) : (
-          <span className="bg-yellow-100 text-yellow-700 text-xs font-semibold px-2.5 py-1 rounded-full">
-            No Profile Yet
-          </span>
-        )}
-      </div>
-      <p className="text-sm text-gray-500 mb-6">
-        {profile
-          ? 'Update your professional legal profile visible to clients.'
-          : 'Create your lawyer profile so clients can discover and hire you.'}
-      </p>
+      <div className="bg-white rounded-2xl shadow p-8 max-w-2xl mx-auto">
+        <Link href="/" className="inline-block text-sm text-gray-500 hover:text-[#1A3C5E] mb-4">
+          ← Back to Home
+        </Link>
 
-      <div className="bg-white rounded-2xl shadow p-8 max-w-2xl">
+        <div className="flex items-center gap-3 mb-2">
+          <h1 className="text-2xl font-extrabold text-gray-800">Manage Legal Profile</h1>
+          {profile ? (
+            <span className="bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full">
+              Profile Active
+            </span>
+          ) : (
+            <span className="bg-yellow-100 text-yellow-700 text-xs font-semibold px-2.5 py-1 rounded-full">
+              No Profile Yet
+            </span>
+          )}
+        </div>
+        <p className="text-sm text-gray-500 mb-6">
+          {profile
+            ? 'Update your professional legal profile visible to clients.'
+            : 'Create your lawyer profile so clients can discover and hire you.'}
+        </p>
+
         {/* Avatar Preview */}
         {previewAvatar && (
           <div className="flex justify-center mb-6">

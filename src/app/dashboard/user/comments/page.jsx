@@ -1,6 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
+import { FaTrash } from 'react-icons/fa';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import axiosInstance from '@/lib/axios';
 
@@ -57,26 +59,68 @@ function EditModal({ comment, onClose, onSave }) {
   );
 }
 
+function DeleteModal({ comment, deleting, onClose, onConfirm }) {
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <FaTrash className="text-red-600" />
+          <h3 className="text-lg font-bold text-gray-800">Delete Comment</h3>
+        </div>
+
+        <p className="text-sm text-gray-600 leading-relaxed">
+          Are you sure you want to delete this comment? This action cannot be undone.
+        </p>
+
+        <div className="flex gap-3 mt-6">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={deleting}
+            className="flex-1 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={() => onConfirm(comment._id)}
+            disabled={deleting}
+            className="flex-1 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 disabled:opacity-60 transition-colors"
+          >
+            {deleting ? 'Deleting…' : 'Delete'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function UserCommentsContent() {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [editingComment, setEditingComment] = useState(null);
+  const [commentToDelete, setCommentToDelete] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
 
-  useEffect(() => {
-    const fetch = async () => {
-      try {
-        const res = await axiosInstance.get('/api/comments/user/my-comments');
-        setComments(res.data);
-      } catch {
-        setError('Failed to load your comments.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetch();
+  const fetchComments = useCallback(async () => {
+    try {
+      const res = await axiosInstance.get('/api/comments/user/my-comments');
+      setComments(res.data);
+    } catch {
+      setError('Failed to load your comments.');
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchComments();
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, [fetchComments]);
 
   const handleSave = (id, newText) => {
     setComments((prev) =>
@@ -85,13 +129,25 @@ function UserCommentsContent() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this comment?')) return;
     setDeletingId(id);
     try {
-      await axiosInstance.delete(`/api/comments/${id}`);
-      setComments((prev) => prev.filter((c) => c._id !== id));
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:8000/api/comments/${id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete comment');
+      }
+
+      setCommentToDelete(null);
+      await fetchComments();
+      toast.success('Comment deleted!');
     } catch {
-      alert('Failed to delete comment. Please try again.');
+      setError('Failed to delete comment. Please try again.');
     } finally {
       setDeletingId(null);
     }
@@ -104,6 +160,15 @@ function UserCommentsContent() {
           comment={editingComment}
           onClose={() => setEditingComment(null)}
           onSave={handleSave}
+        />
+      )}
+
+      {commentToDelete && (
+        <DeleteModal
+          comment={commentToDelete}
+          deleting={deletingId === commentToDelete._id}
+          onClose={() => setCommentToDelete(null)}
+          onConfirm={handleDelete}
         />
       )}
 
@@ -159,11 +224,11 @@ function UserCommentsContent() {
                     Edit
                   </button>
                   <button
-                    onClick={() => handleDelete(c._id)}
+                    onClick={() => setCommentToDelete(c)}
                     disabled={deletingId === c._id}
                     className="px-3 py-1.5 text-xs font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 disabled:opacity-50 transition-colors"
                   >
-                    {deletingId === c._id ? 'Deleting…' : 'Delete'}
+                    Delete
                   </button>
                 </div>
               </div>
