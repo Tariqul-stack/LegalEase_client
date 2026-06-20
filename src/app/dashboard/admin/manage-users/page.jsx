@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
+import toast from 'react-hot-toast';
+import { FaExclamationTriangle, FaTrash } from 'react-icons/fa';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import axiosInstance from '@/lib/axios';
 
@@ -37,7 +39,7 @@ function RoleDropdown({ user, onRoleChange }) {
       await axiosInstance.patch(`/api/admin/users/${user._id}/role`, { role: newRole });
       onRoleChange(user._id, newRole);
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to change role.');
+      toast.error(err.response?.data?.message || 'Failed to change role.');
     } finally {
       setLoading(false);
     }
@@ -76,30 +78,72 @@ function RoleDropdown({ user, onRoleChange }) {
   );
 }
 
-function DeleteButton({ userId, onDelete }) {
-  const [loading, setLoading] = useState(false);
-
-  const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
-    setLoading(true);
-    try {
-      await axiosInstance.delete(`/api/admin/users/${userId}`);
-      onDelete(userId);
-    } catch (err) {
-      alert(err.response?.data?.message || 'Failed to delete user.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+function DeleteButton({ user, onClick }) {
   return (
     <button
-      onClick={handleDelete}
-      disabled={loading}
+      onClick={() => onClick(user)}
       className="px-3 py-1.5 text-xs font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
     >
-      {loading ? 'Deleting…' : 'Delete'}
+      Delete
     </button>
+  );
+}
+
+function DeleteConfirmationModal({ user, deleting, onCancel, onDelete }) {
+  if (!user) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 py-6">
+      <div className="w-full max-w-[400px] rounded-2xl bg-white p-6 shadow-xl">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600">
+            <FaTrash size={18} />
+          </div>
+          <h2 className="text-xl font-extrabold text-gray-900">Delete User</h2>
+        </div>
+
+        <div className="mt-5 flex gap-3 rounded-xl border border-red-100 bg-red-50 p-3 text-sm text-red-700">
+          <FaExclamationTriangle className="mt-0.5 shrink-0" size={16} />
+          <p>
+            Are you sure you want to delete this user? This action cannot be undone.
+          </p>
+        </div>
+
+        <div className="mt-4 rounded-xl bg-gray-50 p-4">
+          <p className="text-sm font-semibold text-gray-800">{user.name}</p>
+          <p className="mt-1 text-sm text-gray-500">{user.email}</p>
+        </div>
+
+        <div className="mt-6 grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={deleting}
+            className="rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onDelete}
+            disabled={deleting}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {deleting ? (
+              <>
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                Deleting
+              </>
+            ) : (
+              <>
+                <FaTrash size={13} />
+                Delete
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -107,6 +151,8 @@ function ManageUsersContent() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [userToDelete, setUserToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -132,12 +178,42 @@ function ManageUsersContent() {
     setUsers((prev) => prev.map((u) => (u._id === id ? { ...u, role: newRole } : u)));
   };
 
-  const handleDelete = (id) => {
-    setUsers((prev) => prev.filter((u) => u._id !== id));
+  const handleDelete = async () => {
+    if (!userToDelete) return;
+
+    setDeleting(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:8000/api/admin/users/${userToDelete._id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete user.');
+      }
+
+      toast.success('User deleted!');
+      await fetchUsers();
+      setUserToDelete(null);
+    } catch {
+      toast.error('Failed to delete user.');
+    } finally {
+      setDeleting(false);
+    }
   };
 
   return (
     <div>
+      <DeleteConfirmationModal
+        user={userToDelete}
+        deleting={deleting}
+        onCancel={() => setUserToDelete(null)}
+        onDelete={handleDelete}
+      />
+
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-extrabold text-gray-800">Manage Users</h1>
@@ -196,7 +272,7 @@ function ManageUsersContent() {
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-2">
                         <RoleDropdown user={u} onRoleChange={handleRoleChange} />
-                        <DeleteButton userId={u._id} onDelete={handleDelete} />
+                        <DeleteButton user={u} onClick={setUserToDelete} />
                       </div>
                     </td>
                   </tr>
