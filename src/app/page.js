@@ -214,7 +214,7 @@ export default function HomePage() {
               <p className="mt-3">{error}</p>
             </div>
           ) : loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {Array.from({ length: 6 }).map((_, i) => (
                 <SkeletonCard key={i} />
               ))}
@@ -227,7 +227,7 @@ export default function HomePage() {
             </div>
           ) : (
             <motion.div
-              className="grid grid-cols-2 md:grid-cols-3 gap-6"
+              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"
               variants={stagger}
               initial="hidden"
               whileInView="visible"

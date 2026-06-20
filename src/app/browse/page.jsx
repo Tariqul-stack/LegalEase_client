@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect, useState, useMemo } from 'react';
-import Link from 'next/link';
-import axiosInstance from '@/lib/axios';
+import { useEffect, useState, useMemo } from "react";
+import Link from "next/link";
+import axiosInstance from "@/lib/axios";
 
 const ITEMS_PER_PAGE = 8;
 
@@ -25,7 +25,7 @@ function LawyerCard({ lawyer }) {
     lawyer.photo ||
     `https://ui-avatars.com/api/?name=${encodeURIComponent(lawyer.name)}&background=1A3C5E&color=fff&size=128`;
 
-  const isBusy = lawyer.status === 'busy';
+  const isBusy = lawyer.status === "busy";
 
   return (
     <div className="bg-white rounded-xl shadow hover:shadow-lg transition-shadow p-6 flex flex-col items-center text-center relative">
@@ -43,11 +43,13 @@ function LawyerCard({ lawyer }) {
         {lawyer.name}
       </h3>
       <p className="text-sm text-blue-600 font-medium mb-1 truncate w-full">
-        {lawyer.specialization || 'General Practice'}
+        {lawyer.specialization || "General Practice"}
       </p>
       {lawyer.consultationFee != null && (
         <p className="text-xs text-gray-500 mb-4">
-          <span className="font-semibold text-gray-700">${lawyer.consultationFee}/hr</span>
+          <span className="font-semibold text-gray-700">
+            ${lawyer.consultationFee}/hr
+          </span>
         </p>
       )}
       <Link
@@ -64,12 +66,12 @@ function LawyerCard({ lawyer }) {
 export default function BrowsePage() {
   const [lawyers, setLawyers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   // Filters
-  const [search, setSearch] = useState('');
-  const [feeRange, setFeeRange] = useState('any');
-  const [availability, setAvailability] = useState('all');
+  const [search, setSearch] = useState("");
+  const [feeRange, setFeeRange] = useState("any");
+  const [availability, setAvailability] = useState("all");
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -77,10 +79,10 @@ export default function BrowsePage() {
   useEffect(() => {
     const fetchLawyers = async () => {
       try {
-        const res = await axiosInstance.get('/api/lawyers');
+        const res = await axiosInstance.get("/api/lawyers");
         setLawyers(res.data);
       } catch {
-        setError('Could not load lawyers. Please try again later.');
+        setError("Could not load lawyers. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -105,46 +107,54 @@ export default function BrowsePage() {
       // Fee filter
       const fee = lawyer.consultationFee ?? 0;
       let matchesFee = true;
-      if (feeRange === 'under100') matchesFee = fee < 100;
-      else if (feeRange === '100to300') matchesFee = fee >= 100 && fee <= 300;
-      else if (feeRange === 'above300') matchesFee = fee > 300;
+      if (feeRange === "under100") matchesFee = fee < 100;
+      else if (feeRange === "100to300") matchesFee = fee >= 100 && fee <= 300;
+      else if (feeRange === "above300") matchesFee = fee > 300;
 
       // Availability filter
       let matchesAvailability = true;
-      if (availability === 'available') matchesAvailability = lawyer.status !== 'busy';
-      else if (availability === 'busy') matchesAvailability = lawyer.status === 'busy';
+      if (availability === "available")
+        matchesAvailability = lawyer.status !== "busy";
+      else if (availability === "busy")
+        matchesAvailability = lawyer.status === "busy";
 
       return matchesSearch && matchesFee && matchesAvailability;
     });
   }, [lawyers, search, feeRange, availability]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredLawyers.length / ITEMS_PER_PAGE));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredLawyers.length / ITEMS_PER_PAGE),
+  );
   const paginatedLawyers = filteredLawyers.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
+    currentPage * ITEMS_PER_PAGE,
   );
 
   const handlePrev = () => setCurrentPage((p) => Math.max(1, p - 1));
   const handleNext = () => setCurrentPage((p) => Math.min(totalPages, p + 1));
 
   const resetFilters = () => {
-    setSearch('');
-    setFeeRange('any');
-    setAvailability('all');
+    setSearch("");
+    setFeeRange("any");
+    setAvailability("all");
   };
 
-  const hasActiveFilters = search || feeRange !== 'any' || availability !== 'all';
+  const hasActiveFilters =
+    search || feeRange !== "any" || availability !== "all";
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* ── Page Header ────────────────────────────────────────────────── */}
       <div className="bg-[#1A3C5E] text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl sm:text-4xl font-extrabold mb-2">Browse Lawyers</h1>
+          <h1 className="text-3xl sm:text-4xl font-extrabold mb-2">
+            Browse Lawyers
+          </h1>
           <p className="text-blue-200 text-base">
             {loading
-              ? 'Loading available lawyers…'
-              : `${filteredLawyers.length} lawyer${filteredLawyers.length !== 1 ? 's' : ''} found`}
+              ? "Loading available lawyers…"
+              : `${filteredLawyers.length} lawyer${filteredLawyers.length !== 1 ? "s" : ""} found`}
           </p>
         </div>
       </div>
@@ -253,7 +263,7 @@ export default function BrowsePage() {
         {/* ── Lawyer Grid ───────────────────────────────────────────────── */}
         {!error && !loading && paginatedLawyers.length > 0 && (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
               {paginatedLawyers.map((lawyer) => (
                 <LawyerCard key={lawyer._id} lawyer={lawyer} />
               ))}
@@ -267,14 +277,28 @@ export default function BrowsePage() {
                   disabled={currentPage === 1}
                   className="flex items-center gap-1 px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
                   </svg>
                   Previous
                 </button>
 
                 <span className="text-sm font-medium text-gray-600">
-                  Page <span className="font-bold text-[#1A3C5E]">{currentPage}</span> of{' '}
+                  Page{" "}
+                  <span className="font-bold text-[#1A3C5E]">
+                    {currentPage}
+                  </span>{" "}
+                  of{" "}
                   <span className="font-bold text-[#1A3C5E]">{totalPages}</span>
                 </span>
 
@@ -284,8 +308,18 @@ export default function BrowsePage() {
                   className="flex items-center gap-1 px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   Next
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
                   </svg>
                 </button>
               </div>
