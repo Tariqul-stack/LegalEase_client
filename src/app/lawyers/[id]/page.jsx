@@ -222,28 +222,41 @@ function CommentsSection({ lawyerId, user }) {
 
     setSubmitting(true);
     setCommentError("");
-    setCommentSuccess("");
 
     try {
-      await axiosInstance.post("/api/comments", {
-        lawyerId,
-        comment: commentText.trim(),
+      const token = localStorage.getItem("token");
+      const user = JSON.parse(localStorage.getItem("user"));
+
+      const response = await fetch("http://localhost:8000/api/comments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          lawyerId,
+          clientName: user.name,
+          clientPhoto: user.photo || "",
+          comment: commentText,
+        }),
       });
-      setCommentText("");
-      setCommentSuccess("Your comment has been posted!");
-      fetchComments(); // refresh list
-    } catch (err) {
-      const apiMessage = err.response?.data?.message?.toLowerCase() || "";
-      if (apiMessage.includes("token") || apiMessage.includes("unauthorized")) {
-        setCommentError("You can only review a lawyer after hiring them.");
-      } else if (
-        apiMessage.includes("hiring") ||
-        apiMessage.includes("hired")
-      ) {
-        setCommentError("You can only review a lawyer after hiring them");
-      } else {
-        setCommentError("Failed to post review. Please try again");
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (data.message?.includes("hiring") || data.message?.includes("hired")) {
+          setCommentError("You can only review a lawyer after hiring them");
+        } else {
+          setCommentError("Failed to post review. Please try again");
+        }
+        return;
       }
+
+      setCommentText("");
+      fetchComments();
+      toast.success("Review posted successfully!");
+    } catch {
+      setCommentError("Failed to post review. Please try again");
     } finally {
       setSubmitting(false);
     }
