@@ -118,10 +118,26 @@ function ManageLegalProfileContent() {
       if (profile) {
         res = await axiosInstance.put(`/api/lawyers/${profile._id}`, payload);
         setProfile((prev) => ({ ...prev, ...res.data }));
+        const newPhotoUrl = formData.photo.trim();
+        if (newPhotoUrl) {
+          const updatedUser = JSON.parse(localStorage.getItem('user'));
+          updatedUser.photo = newPhotoUrl;
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+          window.dispatchEvent(new Event('userUpdated'));
+          window.dispatchEvent(new Event('auth-change'));
+        }
         setSuccess('Legal profile updated successfully!');
       } else {
         res = await axiosInstance.post('/api/lawyers', payload);
         setProfile(res.data);
+        const newPhotoUrl = formData.photo.trim();
+        if (newPhotoUrl) {
+          const updatedUser = JSON.parse(localStorage.getItem('user'));
+          updatedUser.photo = newPhotoUrl;
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+          window.dispatchEvent(new Event('userUpdated'));
+          window.dispatchEvent(new Event('auth-change'));
+        }
         setSuccess('Legal profile created successfully!');
       }
     } catch (err) {

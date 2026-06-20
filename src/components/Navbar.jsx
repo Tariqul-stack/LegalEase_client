@@ -23,6 +23,15 @@ export default function Navbar() {
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    const handleUserUpdate = () => {
+      window.dispatchEvent(new Event('auth-change'));
+    };
+
+    window.addEventListener('userUpdated', handleUserUpdate);
+    return () => window.removeEventListener('userUpdated', handleUserUpdate);
+  }, []);
+
   const navLinks = [
     { name: 'Home', path: '/' },
     { name: 'Browse Lawyers', path: '/browse' },

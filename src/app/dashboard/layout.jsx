@@ -63,6 +63,16 @@ export default function DashboardLayout({ children }) {
     return () => clearTimeout(timer);
   }, [router]);
 
+  useEffect(() => {
+    const handleUserUpdate = () => {
+      const userData = localStorage.getItem('user');
+      if (userData) setUser(JSON.parse(userData));
+    };
+
+    window.addEventListener('userUpdated', handleUserUpdate);
+    return () => window.removeEventListener('userUpdated', handleUserUpdate);
+  }, []);
+
   if (!mounted || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
