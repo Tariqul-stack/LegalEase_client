@@ -7,10 +7,14 @@ export default function DashboardHomePage() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem('user');
-      if (raw) setUser(JSON.parse(raw));
-    } catch { }
+    const timer = setTimeout(() => {
+      try {
+        const raw = localStorage.getItem('user');
+        if (raw) setUser(JSON.parse(raw));
+      } catch { }
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, []);
 
   if (!user) {
@@ -33,9 +37,13 @@ export default function DashboardHomePage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-extrabold text-gray-800 mb-6">My Profile</h1>
+      <div className="bg-white rounded-2xl shadow p-8 max-w-md mx-auto">
+        <Link href="/" className="inline-block text-sm text-gray-500 hover:text-[#1A3C5E] mb-4">
+          ← Back to Home
+        </Link>
 
-      <div className="bg-white rounded-2xl shadow p-8 max-w-xl">
+        <h1 className="text-2xl font-extrabold text-gray-800 mb-6">My Profile</h1>
+
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
           <img
             src={avatarSrc}

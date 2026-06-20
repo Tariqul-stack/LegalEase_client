@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import ImageUpload from '@/components/ImageUpload';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import axiosInstance from '@/lib/axios';
 
@@ -70,9 +72,13 @@ function UpdateProfileContent() {
 
   return (
     <div>
-      <h1 className="text-2xl font-extrabold text-gray-800 mb-6">Update Profile</h1>
+      <div className="bg-white rounded-2xl shadow p-8 max-w-lg mx-auto">
+        <Link href="/" className="inline-block text-sm text-gray-500 hover:text-[#1A3C5E] mb-4">
+          ← Back to Home
+        </Link>
 
-      <div className="bg-white rounded-2xl shadow p-8 max-w-lg">
+        <h1 className="text-2xl font-extrabold text-gray-800 mb-6">Update Profile</h1>
+
         {/* Avatar Preview */}
         {previewAvatar && (
           <div className="flex justify-center mb-6">
@@ -83,6 +89,16 @@ function UpdateProfileContent() {
             />
           </div>
         )}
+
+        <div className="flex justify-center mb-6">
+          <ImageUpload
+            onUpload={(url) => {
+              setFormData((prev) => ({ ...prev, photo: url }));
+              setSuccess('');
+              setError('');
+            }}
+          />
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
@@ -98,22 +114,6 @@ function UpdateProfileContent() {
               onChange={handleChange}
               className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1A3C5E]/40 focus:border-[#1A3C5E]"
               placeholder="Your full name"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="photo">
-              Profile Photo URL{' '}
-              <span className="text-gray-400 font-normal">(optional)</span>
-            </label>
-            <input
-              id="photo"
-              name="photo"
-              type="url"
-              value={formData.photo}
-              onChange={handleChange}
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1A3C5E]/40 focus:border-[#1A3C5E]"
-              placeholder="https://example.com/photo.jpg"
             />
           </div>
 
