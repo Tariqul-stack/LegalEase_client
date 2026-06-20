@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import toast from "react-hot-toast";
+import axios from "axios";
 import axiosInstance from "@/lib/axios";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -46,24 +48,32 @@ function LawyerSkeleton() {
 
 // ─── Hire Modal ───────────────────────────────────────────────────────────────
 
-function HireModal({ lawyer, user, onClose }) {
+function HireModal({ lawyer, user, onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
   const handleConfirm = async () => {
     setLoading(true);
     setError("");
     try {
-      await axiosInstance.post("/api/hirings", {
-        lawyerId: lawyer._id,
-        clientName: user.name,
-        clientEmail: user.email,
-        lawyerName: lawyer.name,
-        specialization: lawyer.specialization,
-        fee: lawyer.consultationFee,
-      });
-      setSuccess(true);
+      const token = localStorage.getItem("token");
+      await axios.post(
+        "http://localhost:8000/api/hirings",
+        {
+          lawyerId: lawyer._id,
+          clientName: user.name,
+          clientEmail: user.email,
+          lawyerName: lawyer.name,
+          specialization: lawyer.specialization,
+          fee: lawyer.consultationFee,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      toast.success("Hiring request sent successfully!");
+      onSuccess();
+      onClose();
     } catch (err) {
       setError(
         err.response?.data?.message ||
@@ -76,8 +86,8 @@ function HireModal({ lawyer, user, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
-        <div className="bg-[#1A3C5E] px-8 py-5 flex items-center justify-between">
+      <div className="bg-white rounded-2xl shadow-2xl w-full md:min-w-[500px] md:max-w-xl overflow-hidden">
+        <div className="bg-[#1A3C5E] px-10 py-6 flex items-center justify-between">
           <h2 className="text-xl font-bold text-white">Confirm Hiring</h2>
           <button
             onClick={onClose}
@@ -99,27 +109,10 @@ function HireModal({ lawyer, user, onClose }) {
           </button>
         </div>
 
-        <div className="px-8 py-6">
-          {success ? (
-            <div className="text-center py-4">
-              <span className="text-5xl">✅</span>
-              <h3 className="mt-4 text-xl font-bold text-gray-800">
-                Hiring Request Sent!
-              </h3>
-              <p className="text-gray-500 mt-2 text-sm">
-                Your request has been sent to <strong>{lawyer.name}</strong>.
-                They will respond shortly.
-              </p>
-              <button
-                onClick={onClose}
-                className="mt-6 w-full py-2.5 px-4 rounded-lg bg-[#1A3C5E] text-white font-medium hover:bg-[#15304a] transition-colors"
-              >
-                Done
-              </button>
-            </div>
-          ) : (
+        <div className="px-10 py-8">
+          {
             <>
-              <div className="bg-gray-50 rounded-xl p-4 mb-6 space-y-2">
+              <div className="bg-gray-50 rounded-xl p-5 mb-7 space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Lawyer</span>
                   <span className="font-semibold text-gray-800">
@@ -190,7 +183,7 @@ function HireModal({ lawyer, user, onClose }) {
                 </button>
               </div>
             </>
-          )}
+          }
         </div>
       </div>
     </div>
@@ -378,6 +371,7 @@ export default function LawyerDetailPage() {
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [user, setUser] = useState(null);
+  const [isHired, setIsHired] = useState(false);
 
   useEffect(() => {
     setUser(getStoredUser());
@@ -398,6 +392,32 @@ export default function LawyerDetailPage() {
     fetchLawyer();
   }, [id]);
 
+  useEffect(() => {
+    if (!user || user.role !== "user" || !lawyer?._id) return;
+
+    const checkHiringStatus = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get("http://localhost:8000/api/hirings/user", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const alreadyHired = res.data.some(
+          (hiring) =>
+            String(hiring.lawyerId?._id || hiring.lawyerId) ===
+            String(lawyer._id),
+        );
+        setIsHired(alreadyHired);
+      } catch {
+        setIsHired(false);
+      }
+    };
+
+    checkHiringStatus();
+  }, [user, lawyer]);
+
   const avatarSrc = lawyer?.photo
     ? lawyer.photo
     : lawyer
@@ -413,6 +433,7 @@ export default function LawyerDetailPage() {
           lawyer={lawyer}
           user={user}
           onClose={() => setShowModal(false)}
+          onSuccess={() => setIsHired(true)}
         />
       )}
 
@@ -531,7 +552,11 @@ export default function LawyerDetailPage() {
 
                   {/* CTA Buttons */}
                   <div>
-                    {user?.role === "user" ? (
+                    {user?.role === "user" && isHired ? (
+                      <span className="inline-block px-8 py-3 bg-green-100 text-green-700 font-semibold rounded-lg">
+                        ✓ Already Hired
+                      </span>
+                    ) : user?.role === "user" ? (
                       <button
                         onClick={() => setShowModal(true)}
                         className="px-8 py-3 bg-[#1A3C5E] text-white font-semibold rounded-lg hover:bg-[#15304a] transition-colors shadow"
