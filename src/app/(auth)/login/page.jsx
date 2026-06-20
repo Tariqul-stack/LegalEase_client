@@ -42,6 +42,10 @@ export default function LoginPage() {
       const response = await axiosInstance.post('/api/auth/login', formData);
       const { token, user } = response.data;
 
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      console.log('token saved:', response.data.token);
+
       // Save to localStorage using our custom hook
       login(token, user);
       
@@ -77,6 +81,10 @@ export default function LoginPage() {
         });
 
         const { token, user } = response.data;
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        console.log('token saved:', response.data.token);
+
         login(token, user);
         toast.success('Welcome back!');
         router.push('/');

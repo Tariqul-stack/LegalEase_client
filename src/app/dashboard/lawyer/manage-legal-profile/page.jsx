@@ -158,7 +158,7 @@ function ManageLegalProfileContent() {
     return (
       <div>
         <h1 className="text-2xl font-extrabold text-gray-800 mb-6">Manage Legal Profile</h1>
-        <div className="bg-white rounded-2xl shadow p-8 max-w-2xl animate-pulse space-y-4">
+        <div className="bg-white rounded-2xl shadow p-8 max-w-2xl mx-auto animate-pulse space-y-4">
           <div className="w-24 h-24 rounded-full bg-gray-200 mx-auto" />
           {[1, 2, 3, 4, 5].map((i) => (
             <div key={i} className="h-10 bg-gray-200 rounded-lg w-full" />

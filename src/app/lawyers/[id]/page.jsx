@@ -338,19 +338,23 @@ function CommentsSection({ lawyerId, user }) {
       ) : (
         <div className="space-y-4">
           {comments.map((c) => {
-            const avatar =
-              c.clientPhoto ||
-              `https://ui-avatars.com/api/?name=${encodeURIComponent(c.clientName || "User")}&background=1A3C5E&color=fff&size=64`;
+            const clientInitial = (c.clientName || "User").charAt(0).toUpperCase();
             return (
               <div
                 key={c._id}
                 className="bg-white rounded-xl shadow p-5 flex gap-4"
               >
-                <img
-                  src={avatar}
-                  alt={c.clientName}
-                  className="w-10 h-10 rounded-full object-cover flex-shrink-0 mt-0.5"
-                />
+                {c.clientPhoto ? (
+                  <img
+                    src={c.clientPhoto}
+                    alt={c.clientName}
+                    className="w-10 h-10 rounded-full object-cover flex-shrink-0 mt-0.5"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-[#1A3C5E] flex items-center justify-center text-white font-bold flex-shrink-0 mt-0.5">
+                    {clientInitial}
+                  </div>
+                )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
                     <span className="font-semibold text-gray-800 text-sm">

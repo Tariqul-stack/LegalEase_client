@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
 import toast from 'react-hot-toast';
 import PaymentModal from '@/components/PaymentModal';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -115,7 +116,12 @@ function UserHiringHistoryContent() {
               {hirings.map((h) => (
                 <tr key={h._id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-5 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">
-                    {h.lawyerName}
+                    <Link
+                      href={`/lawyers/${h.lawyerId}`}
+                      className="text-[#1A3C5E] hover:underline cursor-pointer"
+                    >
+                      {h.lawyerName}
+                    </Link>
                   </td>
                   <td className="px-5 py-4 text-sm text-gray-600 whitespace-nowrap">
                     {h.specialization || '—'}

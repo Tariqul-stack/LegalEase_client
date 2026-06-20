@@ -37,7 +37,7 @@ function LawyerCard({ lawyer }) {
       <img
         src={avatarSrc}
         alt={lawyer.name}
-        className="w-20 h-20 rounded-full object-cover border-4 border-[#1A3C5E]/20 mb-4"
+        className="w-24 h-24 rounded-full object-cover border-4 border-[#1A3C5E]/20 mb-4"
       />
       <h3 className="text-base font-bold text-gray-800 mb-1 truncate w-full">
         {lawyer.name}
