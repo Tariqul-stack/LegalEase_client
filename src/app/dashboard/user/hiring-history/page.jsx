@@ -1,6 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
+import PaymentModal from '@/components/PaymentModal';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import axiosInstance from '@/lib/axios';
 
@@ -25,20 +27,32 @@ function UserHiringHistoryContent() {
   const [hirings, setHirings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedHiring, setSelectedHiring] = useState(null);
+
+  const fetchHirings = useCallback(async () => {
+    try {
+      const res = await axiosInstance.get('/api/hirings/user');
+      setHirings(res.data);
+    } catch {
+      setError('Failed to load hiring history.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const fetch = async () => {
-      try {
-        const res = await axiosInstance.get('/api/hirings/user');
-        setHirings(res.data);
-      } catch {
-        setError('Failed to load hiring history.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetch();
-  }, []);
+    const timer = setTimeout(() => {
+      fetchHirings();
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, [fetchHirings]);
+
+  const handlePaymentSuccess = async () => {
+    await fetchHirings();
+    setSelectedHiring(null);
+    toast.success('Payment successful!');
+  };
 
   if (loading) {
     return (
@@ -61,6 +75,14 @@ function UserHiringHistoryContent() {
 
   return (
     <div>
+      {selectedHiring && (
+        <PaymentModal
+          hiring={selectedHiring}
+          onClose={() => setSelectedHiring(null)}
+          onSuccess={handlePaymentSuccess}
+        />
+      )}
+
       <h1 className="text-2xl font-extrabold text-gray-800 mb-6">Hiring History</h1>
 
       {error && (
@@ -121,9 +143,8 @@ function UserHiringHistoryContent() {
                         </span>
                       ) : (
                         <button
-                          disabled
-                          title="Stripe payment coming soon"
-                          className="px-3 py-1.5 bg-[#1A3C5E] text-white text-xs font-medium rounded-lg opacity-60 cursor-not-allowed"
+                          onClick={() => setSelectedHiring(h)}
+                          className="px-3 py-1.5 bg-[#1A3C5E] text-white text-xs font-medium rounded-lg hover:bg-[#15304a] transition-colors"
                         >
                           Pay Now
                         </button>
