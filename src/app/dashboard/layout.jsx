@@ -19,12 +19,14 @@ const navByRole = {
   user: [
     { label: 'My Profile', path: '/dashboard', icon: <FaUser /> },
     { label: 'Hiring History', path: '/dashboard/user/hiring-history', icon: <FaHistory /> },
+    { label: 'My Transactions', path: '/dashboard/user/transactions', icon: <FaMoneyBillWave /> },
     { label: 'My Comments', path: '/dashboard/user/comments', icon: <FaComments /> },
     { label: 'Update Profile', path: '/dashboard/user/update-profile', icon: <FaUserEdit /> },
   ],
   lawyer: [
     { label: 'My Profile', path: '/dashboard', icon: <FaUser /> },
     { label: 'Hiring Requests', path: '/dashboard/lawyer/hiring-history', icon: <FaClipboardList /> },
+    { label: 'My Earnings', path: '/dashboard/lawyer/transactions', icon: <FaMoneyBillWave /> },
     { label: 'Manage Profile', path: '/dashboard/lawyer/manage-legal-profile', icon: <FaBriefcase /> },
   ],
   admin: [
