@@ -97,9 +97,11 @@ export default function LoginPage() {
     },
     onError: () => {
       setError('Google login failed. Please try again.');
-      toast.error('Something went wrong!');
+      toast.error('Google login failed.');
     },
-    flow: 'implicit',
+    flow: 'auth-code',
+    ux_mode: 'redirect',
+    redirect_uri: 'https://legal-ease-client-jet.vercel.app',
   });
 
   return (
