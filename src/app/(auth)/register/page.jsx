@@ -121,38 +121,26 @@ export default function RegisterPage() {
   const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
-        setLoading(true);
-        setError('');
+        const userInfo = await fetch(
+          'https://www.googleapis.com/oauth2/v3/userinfo',
+          { headers: { Authorization: `Bearer ${tokenResponse.access_token}` } }
+        ).then(res => res.json());
 
-        // Get user info from Google
-        const userInfo = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-          headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
-        }).then(res => res.json());
-
-        // Send to our backend
         const response = await axiosInstance.post('/api/auth/google-login', {
           name: userInfo.name,
           email: userInfo.email,
-          photo: userInfo.picture
+          photo: userInfo.picture,
         });
 
         const { token, user } = response.data;
         setRegisteredData({ token, user });
         setShowRoleModal(true);
-      } catch (err) {
-        setError(err.message || 'Google registration failed.');
-        toast.error('Something went wrong!');
-      } finally {
-        setLoading(false);
+      } catch (error) {
+        toast.error('Google login failed. Please try again.');
       }
     },
-    onError: () => {
-      setError('Google registration failed. Please try again.');
-      toast.error('Google login failed.');
-    },
-    flow: 'auth-code',
-    ux_mode: 'redirect',
-    redirect_uri: 'https://legal-ease-client-jet.vercel.app',
+    onError: () => toast.error('Google login failed.'),
+    flow: 'implicit',
   });
 
   const handleRoleSelect = (selectedRole) => {
