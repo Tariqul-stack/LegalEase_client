@@ -10,7 +10,7 @@
 
 | Service | URL |
 |--------|-----|
-| 🖥️ Client (Frontend) | [https://legalease-client.vercel.app](https://legalease-client.vercel.app) *(update after deployment)* |
+| 🖥️ Client (Frontend) | [https://legal-ease-client-jet.vercel.app](https://legal-ease-client-jet.vercel.app)  |
 | ⚙️ Server (Backend) | [https://legal-ease-server-five.vercel.app](https://legal-ease-server-five.vercel.app) |
 | 📁 Client Repository | [https://github.com/Tariqul-stack/LegalEase_client](https://github.com/Tariqul-stack/LegalEase_client) |
 | 📁 Server Repository | [https://github.com/Tariqul-stack/LegalEase-server](https://github.com/Tariqul-stack/LegalEase-server) |

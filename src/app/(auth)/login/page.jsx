@@ -98,7 +98,8 @@ export default function LoginPage() {
     onError: () => {
       setError('Google login failed. Please try again.');
       toast.error('Something went wrong!');
-    }
+    },
+    flow: 'implicit',
   });
 
   return (

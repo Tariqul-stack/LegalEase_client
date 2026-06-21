@@ -149,7 +149,8 @@ export default function RegisterPage() {
     onError: () => {
       setError('Google registration failed. Please try again.');
       toast.error('Something went wrong!');
-    }
+    },
+    flow: 'implicit',
   });
 
   const handleRoleSelect = (selectedRole) => {
