@@ -58,7 +58,7 @@ function HireModal({ lawyer, user, onClose, onSuccess }) {
     try {
       const token = localStorage.getItem("token");
       await axios.post(
-        "http://localhost:8000/api/hirings",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/hirings`,
         {
           lawyerId: lawyer._id,
           clientName: user.name,
@@ -227,7 +227,7 @@ function CommentsSection({ lawyerId, user }) {
       const token = localStorage.getItem("token");
       const user = JSON.parse(localStorage.getItem("user"));
 
-      const response = await fetch("http://localhost:8000/api/comments", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/comments`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -415,7 +415,7 @@ export default function LawyerDetailPage() {
     const checkHiringStatus = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get("http://localhost:8000/api/hirings/user", {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/hirings/user`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

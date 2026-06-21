@@ -33,7 +33,7 @@ function UserTransactionsContent() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:8000/api/hirings/user', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/hirings/user`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
