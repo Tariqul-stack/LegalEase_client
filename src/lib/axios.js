@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:8000',
+  baseURL: 'https://legal-ease-server-five.vercel.app',
 });
 
 // Add a request interceptor
