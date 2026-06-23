@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import axiosInstance from '@/lib/axios';
@@ -122,9 +123,44 @@ function TopExpertCard({ lawyer, rank }) {
   );
 }
 
+function RoleSelectionModal({ onSelectRole }) {
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+      <div className="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden">
+        <div className="bg-[#1A3C5E] px-8 py-6 text-center">
+          <h2 className="text-2xl font-bold text-white">One Last Step!</h2>
+          <p className="text-blue-200 text-sm mt-2">Tell us how you plan to use LegalEase</p>
+        </div>
+        <div className="px-8 py-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <button
+              onClick={() => onSelectRole('user')}
+              className="flex flex-col items-center justify-center p-6 border-2 border-gray-200 rounded-xl hover:border-[#1A3C5E] hover:bg-blue-50 transition-all group"
+            >
+              <span className="text-4xl mb-3">👤</span>
+              <span className="text-base font-semibold text-gray-800 group-hover:text-[#1A3C5E]">I am a Client</span>
+              <span className="text-xs text-gray-500 mt-1 text-center">I want to hire a lawyer</span>
+            </button>
+            <button
+              onClick={() => onSelectRole('lawyer')}
+              className="flex flex-col items-center justify-center p-6 border-2 border-gray-200 rounded-xl hover:border-[#1A3C5E] hover:bg-blue-50 transition-all group"
+            >
+              <span className="text-4xl mb-3">⚖️</span>
+              <span className="text-base font-semibold text-gray-800 group-hover:text-[#1A3C5E]">I am a Lawyer</span>
+              <span className="text-xs text-gray-500 mt-1 text-center">I want to offer legal services</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Home Page ────────────────────────────────────────────────────────────────
 
 export default function HomePage() {
+  const router = useRouter();
+  const [showRoleModal, setShowRoleModal] = useState(false);
   const [lawyers, setLawyers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -143,6 +179,14 @@ export default function HomePage() {
     fetchLawyers();
   }, []);
 
+  useEffect(() => {
+    const showModal = localStorage.getItem('show_role_modal');
+    if (showModal === 'true') {
+      localStorage.removeItem('show_role_modal');
+      setShowRoleModal(true);
+    }
+  }, []);
+
   const featuredLawyers = lawyers.slice(0, 6);
   const topExperts = [...lawyers]
     .sort((a, b) => (b.totalHires ?? 0) - (a.totalHires ?? 0))
@@ -150,6 +194,16 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col">
+      {showRoleModal && (
+        <RoleSelectionModal onSelectRole={(role) => {
+          const user = JSON.parse(localStorage.getItem('user'));
+          const updatedUser = { ...user, role };
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+          window.dispatchEvent(new Event('auth-change'));
+          setShowRoleModal(false);
+          router.refresh();
+        }} />
+      )}
       {/* ── 1. Hero Section ──────────────────────────────────────────────── */}
       <section className="relative bg-gradient-to-br from-[#1A3C5E] via-[#1e4a75] to-[#0f2540] text-white overflow-hidden">
         {/* Decorative blurred circles */}

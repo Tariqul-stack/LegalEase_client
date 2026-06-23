@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axiosInstance from "@/lib/axios";
 import { useAuth } from "@/hooks/useAuth";
-import { useGoogleLogin } from "@react-oauth/google";
+import { signIn } from "@/lib/auth-client";
 import toast from "react-hot-toast";
 
 export default function LoginPage() {
@@ -52,34 +52,16 @@ export default function LoginPage() {
     }
   };
 
-  const googleLogin = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      try {
-        const userInfo = await fetch(
-          "https://www.googleapis.com/oauth2/v3/userinfo",
-          {
-            headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-          },
-        ).then((res) => res.json());
-
-        const response = await axiosInstance.post("/api/auth/google-login", {
-          name: userInfo.name,
-          email: userInfo.email,
-          photo: userInfo.picture,
-        });
-
-        const { token, user } = response.data;
-        localStorage.setItem("token", token);
-        localStorage.setItem("user", JSON.stringify(user));
-        login(token, user);
-        toast.success("Login successful!");
-        router.push("/");
-      } catch (error) {
-        toast.error("Google login failed. Please try again.");
-      }
-    },
-    onError: () => toast.error("Google login failed."),
-  });
+  const handleGoogleLogin = async () => {
+    try {
+      await signIn.social({
+        provider: "google",
+        callbackURL: "/",
+      });
+    } catch (error) {
+      toast.error("Google login failed. Please try again.");
+    }
+  };
 
   return (
     <div className="min-h-[calc(100vh-200px)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -196,7 +178,7 @@ export default function LoginPage() {
 
             <div className="mt-6">
               <button
-                onClick={() => googleLogin()}
+                onClick={handleGoogleLogin}
                 className="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-lg py-3 px-4 hover:bg-gray-50 transition text-sm font-medium text-gray-700"
               >
                 <svg viewBox="0 0 24 24" className="w-5 h-5">
