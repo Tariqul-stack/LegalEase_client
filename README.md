@@ -324,7 +324,7 @@ legalease-server/
 | Service | Platform |
 |--------|----------|
 | Frontend | [Vercel](https://vercel.com) |
-| Backend | [Render](https://render.com) |
+| Backend | [Vercel](https://vercel.com) |
 | Database | [MongoDB Atlas](https://www.mongodb.com/atlas) |
 | Image Hosting | [imgBB](https://imgbb.com) |
 | Payments | [Stripe](https://stripe.com) |
